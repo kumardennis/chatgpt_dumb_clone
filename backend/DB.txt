@@ -1,0 +1,149 @@
+Create table:
+
+`
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    oauth_provider VARCHAR(50),
+    oauth_id VARCHAR(255) UNIQUE NOT NULL,
+    display_name VARCHAR(255),
+    email VARCHAR(255),
+    profile_picture VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+`
+
+`
+CREATE TABLE chats (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_by INT REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+` 
+
+`
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE shared_chats (
+    id SERIAL PRIMARY KEY,
+    chat_id INTEGER REFERENCES chats(id),
+    shared_by_user_id INTEGER REFERENCES users(id),
+    share_token UUID DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Remove shared_with_user_id and accepted fields
+);
+`
+
+`
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    chat_id INT REFERENCES chats(id),
+    user_id INT REFERENCES users(id),
+    text TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+`
+
+`
+ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+`
+
+`
+CREATE POLICY view_own_chats ON chats
+    FOR ALL
+    USING (created_by = current_user_id());  -- Assuming `current_user_id()` returns the ID of the current user
+
+CREATE POLICY view_own_messages ON messages
+    FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM chats
+            WHERE chats.id = messages.chat_id AND chats.created_by = current_user_id()
+        )
+    );
+
+`
+
+--------SEED DATA---------
+
+`
+INSERT INTO users (oauth_provider, oauth_id, display_name, email, profile_picture)
+VALUES
+('google', 'google_user_1', 'User One', 'userone@example.com', 'http://example.com/pic1.jpg'),
+('google', 'google_user_2', 'User Two', 'usertwo@example.com', 'http://example.com/pic2.jpg'),
+('github', 'github_user_1', 'User Three', 'userthree@example.com', 'http://example.com/pic3.jpg');
+
+`
+
+`
+INSERT INTO chats (name, created_by, created_at, updated_at)
+VALUES
+('Chat Room 1', 1, NOW(), NOW()),
+('Chat Room 2', 1, NOW(), NOW()),
+('Chat Room 3', 2, NOW(), NOW());
+`
+
+`
+INSERT INTO messages (chat_id, user_id, text, created_at)
+VALUES
+(1, 1, 'Hello, welcome to Chat Room 1!', NOW()),  
+(1, 2, 'Hi there, thanks for the welcome!', NOW()),
+(2, 1, 'This is the start of Chat Room 2.', NOW()); 
+`
+
+
+--------CREATE DB FUNCTION----------
+
+`
+CREATE OR REPLACE FUNCTION current_user_id() RETURNS integer AS $$
+BEGIN
+    RETURN current_setting('app.current_user_id', true)::integer;
+EXCEPTION WHEN others THEN
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+`
+
+
+
+------RLS POLICY---------
+
+
+`
+ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY user_view_own_chats ON chats
+  FOR SELECT USING (created_by = current_setting('app.current_user_id')::integer);
+
+`
+
+`
+CREATE ROLE authenticated_user;
+GRANT authenticated_user TO your_authenticated_user;
+
+DROP POLICY IF EXISTS user_view_own_chats ON chats;
+
+CREATE POLICY user_view_own_chats ON chats
+    FOR SELECT
+    TO authenticated_user  -- This applies the policy only to users with the 'authenticated_user' role
+    USING (created_by = current_setting('app.current_user_id')::integer);
+
+`
+
+`
+DROP POLICY IF EXISTS user_view_own_chats ON chats;
+
+CREATE POLICY user_view_own_chats ON chats
+    FOR SELECT
+    USING (
+        created_by = current_setting('app.current_user_id')::integer AND
+        current_setting('app.is_authenticated') = 'true'
+    );
+`
