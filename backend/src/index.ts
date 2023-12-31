@@ -71,8 +71,10 @@ app.use(async (req, res, next) => {
 
 // Clear the session variable at the end of the request
 app.use(async (req, res, next) => {
-  await query('RESET SESSION app.current_user_id');
-  next();
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    await query('RESET SESSION app.current_user_id');
+    next();
+  }
 });
 
 app.get('/', (req, res) => {
