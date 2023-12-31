@@ -115,10 +115,11 @@ http://localhost:5000
 
 - Delete a chat from react app
 - Rename a chat from react app
-- Github OAuth
+- Github OAuth Button (Available in Server)
 - Tests
 - Infinite fetch
 - React Query (TanStack Query)
+- Automatic logout after expired session (axios interceptors)
 
 ## Some added features and technical idealogies
 

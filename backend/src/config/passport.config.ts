@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { findUserByOAuthId, createUser } from '../models/userModel';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as GitHubStrategy } from 'passport-github2';
 import { query } from './db.config';
 
 export const localUrl = 'http://localhost:5000';
@@ -21,6 +22,47 @@ passport.use(
         if (!user) {
           user = await createUser(
             'google',
+            profile.id,
+            profile.displayName,
+            profile.emails ? profile.emails[0].value : '',
+            profile.photos ? profile.photos[0].value : '',
+          );
+        }
+
+        await query(`SET app.current_user_id TO '${user.id}'`);
+        await query("SET app.is_authenticated TO 'true'");
+
+        await query('COMMIT');
+        done(null, user);
+      } catch (error) {
+        await query('ROLLBACK');
+        console.error('Error processing Google auth:', error);
+        done(error as any);
+      }
+    },
+  ),
+);
+
+passport.use(
+  new GitHubStrategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      callbackURL: `${localUrl}/auth/google/callback`,
+    },
+    async (
+      accessToken: any,
+      refreshToken: any,
+      profile: { id: string; displayName: string; emails: { value: string }[]; photos: { value: string }[] },
+      done: any,
+    ) => {
+      try {
+        await query('BEGIN');
+        let user = await findUserByOAuthId('github', profile.id);
+
+        if (!user) {
+          user = await createUser(
+            'github',
             profile.id,
             profile.displayName,
             profile.emails ? profile.emails[0].value : '',
