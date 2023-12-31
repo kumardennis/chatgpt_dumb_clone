@@ -69,6 +69,12 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Clear the session variable at the end of the request
+app.use(async (req, res, next) => {
+  await query('RESET SESSION app.current_user_id');
+  next();
+});
+
 app.get('/', (req, res) => {
   res.send(`Hello ! ${req.user ? (req.user as UserSchema).display_name : 'Guest'}`);
 });
