@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: dumbgpt-prod-c
+    image: dumbgpt-prod-i
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:80"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"

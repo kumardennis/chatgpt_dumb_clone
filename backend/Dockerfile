@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 5000
 
 # Define the command to run your app (assumes your output directory is named 'dist')
-CMD [ "node", "dist/index.js" ]
+CMD [ "npm", "run", "dev" ]
