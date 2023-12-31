@@ -69,14 +69,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Clear the session variable at the end of the request
-app.use(async (req, res, next) => {
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    await query('RESET SESSION app.current_user_id');
-    next();
-  }
-});
-
 app.get('/', (req, res) => {
   res.send(`Hello ! ${req.user ? (req.user as UserSchema).display_name : 'Guest'}`);
 });
@@ -87,6 +79,16 @@ app.use('/chats', passport.authenticate('session'), chatsRoutes);
 app.use('/shared-chats', passport.authenticate('session'), sharedChatsRoutes);
 
 app.use('/messages', passport.authenticate('session'), messagesRoutes);
+
+app.use(async (req, res, next) => {
+  res.on('finish', async () => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      await query('RESET SESSION app.current_user_id');
+      next();
+    }
+  });
+  next();
+});
 
 const port = 5000;
 
