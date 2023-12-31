@@ -39,9 +39,9 @@ export const SharedChatRoom = ({ user }: PropTypes) => {
   const transferChatRoom = async () => {
     const new_chat_id = await createTransferChatRoom(token, user?.id);
 
-    window.location.reload();
-
     navigate(`/chats/${new_chat_id}`);
+
+    window.location.reload();
   };
 
   useFetchMessages(token, getMessagesInThisChat);
