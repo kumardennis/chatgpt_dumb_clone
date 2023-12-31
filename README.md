@@ -147,3 +147,4 @@ http://localhost:5000
 - Custom hooks
 - Design principles
 - Husky pre-commit linting
+- RLS policies on chats table
