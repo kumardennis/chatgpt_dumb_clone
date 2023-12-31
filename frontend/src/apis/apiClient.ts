@@ -1,7 +1,10 @@
 import axios, { AxiosRequestConfig } from "axios";
 
+export const localUrl = "http://localhost:5000";
+export const liveUrl = "https://dumb-gpt-backend.onrender.com";
+
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: liveUrl,
   headers: {
     "Content-type": "application/json",
   },

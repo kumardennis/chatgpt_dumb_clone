@@ -3,12 +3,15 @@ import { findUserByOAuthId, createUser } from '../models/userModel';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { query } from './db.config';
 
+export const localUrl = 'http://localhost:5000';
+export const liveUrl = 'https://dumb-gpt-backend.onrender.com';
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      callbackURL: 'http://localhost:5000/auth/google/callback',
+      callbackURL: `${liveUrl}/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

@@ -1,3 +1,4 @@
+import { liveUrl } from "apis/apiClient";
 import { auth_api } from "apis/auth.api";
 import { UserModel } from "models/user.models";
 import GoogleButton from "react-google-button";
@@ -8,7 +9,7 @@ export const LoginPage = () => {
 
   const handleUserLogin = async () => {
     const authWindow = window.open(
-      "http://localhost:5000/auth/google",
+      `${liveUrl}/auth/google`,
       "_blank",
       "width=500,height=600"
     );
