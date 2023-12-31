@@ -130,3 +130,4 @@ http://localhost:5000
 - Feature based architecture (FE)
 - Custom hooks
 - Design principles
+- Husky pre-commit linting
