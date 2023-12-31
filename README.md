@@ -9,6 +9,22 @@ This project is a dumb solution to recreate BE and FE for chatgpt clone. It has 
 - Docker
 - A modern web browser
 
+## If on OSX
+
+Run command in root directory
+
+To make shell script executable
+
+```
+chmod +x run.sh
+```
+
+Run command in root directory to start script
+
+```
+./run.sh
+```
+
 ## Quickstart Development App with Docker
 
 With docker-compose:
