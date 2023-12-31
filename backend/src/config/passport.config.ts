@@ -48,7 +48,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      callbackURL: `${localUrl}/auth/google/callback`,
+      callbackURL: `${liveUrl}/auth/google/callback`,
     },
     async (
       accessToken: any,
